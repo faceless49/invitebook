@@ -1,37 +1,22 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import "./App.css";
 import { UserItem } from "./components/UserItem";
-
+import skeletonPng from "./assets/images/skeleton.png";
+import { Success } from "./components/Success";
 export type UserType = {
+  id: number;
   avatarUrl: string;
   fullName: string;
   email: string;
 };
 
 function App() {
-  const [users, setUsers] = useState<Array<UserType>>([
-    {
-      avatarUrl: "",
-      fullName: "Вася",
-      email: "vasya@pupkin.ru",
-    },
-    {
-      avatarUrl: "",
-      fullName: "фыв",
-      email: "vasya@pupkin.ru",
-    },
-    {
-      avatarUrl: "",
-      fullName: "555555",
-      email: "vasya@pupkin.ru",
-    },
-    {
-      avatarUrl: "",
-      fullName: "рррррррррррррррр",
-      email: "vasya@pupkin.ru",
-    },
-  ]);
+  const [users, setUsers] = useState<Array<UserType>>([]);
   const [inputValue, setInputValue] = useState<string>("");
+  const [list, setList] = useState<Array<UserType>>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmited, setIsSubmited] = useState<boolean>(false);
+
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     setInputValue(value);
@@ -40,10 +25,60 @@ function App() {
     setInputValue("");
   };
 
-  const addUser = (fullName: string) => {
-    console.log(fullName);
+  const addUser = (
+    id: number,
+    fullName: string,
+    avatarUrl: string,
+    email: string
+  ) => {
+    if (list.find((obj: UserType) => obj.id === id)) {
+      setList(list.filter((obj: UserType) => obj.id !== id));
+    } else {
+      setList([...list, { id, avatarUrl, email, fullName }]);
+    }
   };
 
+  const handleClickSend = () => {
+    if (list.length) {
+      sendListRequest();
+    } else {
+      alert("List is empty");
+    }
+  };
+  const handleClickOnOkay = () => {
+    setIsSubmited(false);
+  };
+
+  const sendListRequest = async () => {
+    await fetch("https://617826619c328300175f5e53.mockapi.io/list", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ list }),
+    });
+    setIsSubmited(true);
+  };
+
+  useEffect(() => {
+    fetch("https://617826619c328300175f5e53.mockapi.io/users")
+      .then((res) => res.json())
+      .then((json) => {
+        setUsers(json);
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isSubmited) {
+    return (
+      <div className="container">
+        <div className="box">
+          <Success onClose={handleClickOnOkay} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="App">
       <body>
@@ -80,20 +115,35 @@ function App() {
               </div>
 
               <div className="users">
-                {users
-                  .filter((u) =>
-                    u.fullName
-                      .toLocaleLowerCase()
-                      .includes(inputValue.toLocaleLowerCase())
-                  )
-                  .map((u) => (
-                    <UserItem {...u} onAdd={addUser} />
-                  ))}
+                {isLoading ? (
+                  <img src={skeletonPng} alt="Loading" />
+                ) : (
+                  users
+                    .filter((u) =>
+                      u.fullName
+                        .toLocaleLowerCase()
+                        .includes(inputValue.toLocaleLowerCase())
+                    )
+                    .map((u) => (
+                      <UserItem
+                        id={u.id}
+                        fullName={u.fullName}
+                        email={u.email}
+                        avatarUrl={u.avatarUrl}
+                        onAdd={addUser}
+                        isAdded={list.find((o) => o.id === u.id)}
+                      />
+                    ))
+                )}
               </div>
 
               <div className="form__btn">
                 <button className="form__btn-cancel">Отмена</button>
-                <button className="form__btn-submit" type="submit">
+                <button
+                  className="form__btn-submit"
+                  type="submit"
+                  onClick={handleClickSend}
+                >
                   Отправить
                 </button>
               </div>

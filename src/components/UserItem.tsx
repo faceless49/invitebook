@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
+import { UserType } from "../App";
 
 export type UserItemType = {
-  avatarUrl: string;
+  id: number;
   fullName: string;
+  avatarUrl: string;
   email: string;
-  onAdd: (fullName: string) => void;
+  onAdd: (
+    id: number,
+    fullName: string,
+    avatarUrl: string,
+    email: string
+  ) => void;
+  isAdded: any;
 };
 export const UserItem = (props: UserItemType) => {
-  const { fullName, avatarUrl, email, onAdd } = props;
-
-  const [list, setList] = useState<Array<UserItemType>>([]);
+  const { id, fullName, avatarUrl, email, onAdd, isAdded } = props;
 
   return (
     <div key={fullName} className="users__box">
@@ -22,10 +28,10 @@ export const UserItem = (props: UserItemType) => {
       </div>
       <div className="users__right">
         <button
-          onClick={() => onAdd(fullName)}
+          onClick={() => onAdd(id, fullName, avatarUrl, email)}
           type="button"
-          className="close-btn"
-        ></button>
+          className={`close-btn ${isAdded ? "pushed" : ""}`}
+        />
       </div>
     </div>
   );
