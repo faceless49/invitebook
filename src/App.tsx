@@ -69,7 +69,6 @@ function App() {
         setIsLoading(false);
       });
   }, []);
-
   if (isSubmited) {
     return (
       <div className="container">
@@ -116,22 +115,19 @@ function App() {
 
               <div className="users">
                 {isLoading ? (
-                  <img src={skeletonPng} alt="Loading" />
+                  <img src={skeletonPng} alt="Skeleton" />
                 ) : (
                   users
-                    .filter((u) =>
-                      u.fullName
-                        .toLocaleLowerCase()
-                        .includes(inputValue.toLocaleLowerCase())
+                    .filter((obj) =>
+                      obj.fullName
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase())
                     )
-                    .map((u) => (
+                    .map((obj) => (
                       <UserItem
-                        id={u.id}
-                        fullName={u.fullName}
-                        email={u.email}
-                        avatarUrl={u.avatarUrl}
+                        {...obj}
                         onAdd={addUser}
-                        isAdded={list.find((o) => o.id === u.id)}
+                        isAdded={list.find((o) => o.id === obj.id)}
                       />
                     ))
                 )}
