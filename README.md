@@ -4,3 +4,6 @@
 ## Stack
 - React
 - TypeScript
+
+## API
+- MockAPI
